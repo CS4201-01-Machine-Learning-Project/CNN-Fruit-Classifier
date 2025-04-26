@@ -1,0 +1,12 @@
+create multiple models with different architectures
+factors: # layers, activation function
+
+4-6 models?
+relu: one has 1 layer, other has 
+sigmoid: 1 layer, average # layers, a lot of layers
+
+kate: writing report
+johnny: write report
+
+mayaan: coding (frontend?)
+aidan: coding
