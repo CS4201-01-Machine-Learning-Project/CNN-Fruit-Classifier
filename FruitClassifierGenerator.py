@@ -28,7 +28,7 @@ def getImagesAndLabelsFromFolderPath(folderPath, image_size=(img_height, img_wid
 
 			X.append(np.array(img))
 			y.append(classLabels.index(label))
-			if (DEBUGGING and len(X)>20):
+			if (DEBUGGING and len(X)>50):
 				break
 		
 		
@@ -89,10 +89,10 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 
-with open('bestAccuracy.txt') as f:
+with open('BestRELU1Layer.txt') as f:
 	previousBestAcc = float(f.read())
 if testAcc>= previousBestAcc:
-	with open('bestAccuracy.txt','w') as f:
+	with open('BestRELU1Layer.txt','w') as f:
 		f.write(str(testAcc))
 	model.save('FruitClassifier.keras')
 plt.show()
