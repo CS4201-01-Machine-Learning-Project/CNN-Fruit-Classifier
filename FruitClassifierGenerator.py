@@ -1,3 +1,4 @@
+
 import os
 import numpy as np
 from PIL import Image
@@ -11,6 +12,9 @@ DEBUGGING = True
 classLabels = []
 img_height = 256
 img_width = 256
+with open('specs.txt') as f:
+	activationFunction = f.readline().strip()
+	numLayers = int(f.readline())
 def getImagesAndLabelsFromFolderPath(folderPath, image_size=(img_height, img_width)):
 	X = []
 	y = []
@@ -51,16 +55,31 @@ data_augmentation = models.Sequential([
                                   img_width,
                                   3)),
     layers.RandomZoom(0.1)])
-model = models.Sequential([
-	#keras.Input(shape=(None, 256, 256, 3)),
-	data_augmentation,
+convolutionalLayer = models.Sequential([
 	layers.Conv2D(32, 3, padding='same', activation='relu'),
-	layers.MaxPooling2D(),
-	layers.Dropout(0.2),
-	layers.Flatten(),
-	layers.Dense(64, activation='relu'),
-	layers.Dense(len(classLabels), name="outputs")
-])
+	layers.MaxPooling2D()])
+if numLayers==1:
+	model = models.Sequential([
+		#keras.Input(shape=(None, 256, 256, 3)),
+		data_augmentation,
+		convolutionalLayer,
+		layers.Dropout(0.2),
+		layers.Flatten(),
+		layers.Dense(64, activation=activationFunction),
+		layers.Dense(len(classLabels), name="outputs")
+	])
+elif numLayers==2:
+	model = models.Sequential([
+		#keras.Input(shape=(None, 256, 256, 3)),
+		data_augmentation,
+		convolutionalLayer,
+		convolutionalLayer,
+		layers.Dropout(0.2),
+		layers.Flatten(),
+		layers.Dense(64, activation=activationFunction),
+		layers.Dense(64, activation=activationFunction),
+		layers.Dense(len(classLabels), name="outputs")
+	])
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
@@ -92,10 +111,11 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 print('Accuracy per s:',testAcc/(endTime-startTime))
-with open('BestRELU1Layer.txt') as f:
+filename='Best'+activationFunction+str(numLayers)+'Layer.txt'
+with open(filename) as f:
 	previousBestAcc = float(f.read())
 if testAcc>= previousBestAcc:
-	with open('BestRELU1Layer.txt','w') as f:
+	with open(filename,'w') as f:
 		f.write(str(testAcc/(endTime-startTime)))
-	model.save('FruitClassifier.keras')
+	model.save(activationFunction+str(numLayers)+'LayerFruitClassifier.keras')
 plt.show()
