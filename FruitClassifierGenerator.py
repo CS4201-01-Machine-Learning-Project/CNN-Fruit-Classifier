@@ -6,6 +6,7 @@ from tensorflow import keras
 from tensorflow.keras import layers, models
 import matplotlib.pyplot as plt
 import operator
+import time
 DEBUGGING = True
 classLabels = []
 img_height = 256
@@ -28,12 +29,13 @@ def getImagesAndLabelsFromFolderPath(folderPath, image_size=(img_height, img_wid
 
 			X.append(np.array(img))
 			y.append(classLabels.index(label))
-			if (DEBUGGING and len(X)>50):
+			if (DEBUGGING and len(X)%5==0):
 				break
 		
 		
 	return np.array(X), np.array(y)
 trainImages, trainLabels = getImagesAndLabelsFromFolderPath(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Training"))
+print(len(trainImages))
 testImages, testLabels = getImagesAndLabelsFromFolderPath(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Test"))
 validationImages, validationLabels = getImagesAndLabelsFromFolderPath(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Validation"))
 trainImages=trainImages/255.0
@@ -48,7 +50,6 @@ data_augmentation = models.Sequential([
                       input_shape=(img_height,
                                   img_width,
                                   3)),
-    layers.RandomRotation(0.1),
     layers.RandomZoom(0.1)])
 model = models.Sequential([
 	#keras.Input(shape=(None, 256, 256, 3)),
@@ -64,7 +65,9 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 epochs=10
+startTime = time.time()
 history = model.fit(trainImages, trainLabels, batch_size=32, epochs=epochs, validation_data=(validationImages, validationLabels))
+endTime = time.time()
 testLoss, testAcc = model.evaluate(testImages, testLabels)
 print('Accuracy:',testAcc)
 #print('Loss:',loss)
@@ -88,11 +91,11 @@ plt.plot(epochs_range, loss, label='Training Loss')
 plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
-
+print('Accuracy per s:',testAcc/(endTime-startTime))
 with open('BestRELU1Layer.txt') as f:
 	previousBestAcc = float(f.read())
 if testAcc>= previousBestAcc:
 	with open('BestRELU1Layer.txt','w') as f:
-		f.write(str(testAcc))
+		f.write(str(testAcc/(endTime-startTime)))
 	model.save('FruitClassifier.keras')
 plt.show()
