@@ -10,7 +10,7 @@ import operator
 import time
 
 classLabels = []
-DEBUGGING = True
+DEBUGGING = False
 img_height = 100
 img_width = 100
 def getImagesAndLabelsFromFolderPath(folderPath, image_size=(img_height, img_width)):
