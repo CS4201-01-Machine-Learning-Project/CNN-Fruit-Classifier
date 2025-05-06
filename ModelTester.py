@@ -58,20 +58,23 @@ def load_digit_images_from_folder(folder_path, image_size=(100, 100)):
 
     return np.array(X), np.array(y)
 testImages,testLabels = load_digit_images_from_folder(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Test"))
+classLabels = extract_possible_fruit_names(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Test"))
 testImages = (testImages/255.0).reshape(len(testImages),img_height,img_width,3)
 for folder in os.listdir("models"):
 	for file in os.listdir(os.path.join("models",folder)):
 		if operator.contains(file,"keras"):
+			print(file)
 			model = keras.models.load_model(os.path.join("models",folder,file))
 			loss,acc = model.evaluate(testImages,testLabels)
-			print(str(file)+":"+str(acc))
-			predictions = model.predict(testImages)
-			truePredictions=0
+			predictions = model.predict(testImages).argmax(axis=1)
+			truePredictions = dict()
+			for target in classLabels:
+				truePredictions[classLabels.index(target)]=0
 			predictionsInClass = dict()
 			classInDataset = dict()
 			for i in range(len(predictions)):
 				if testLabels[i] not in classInDataset:
-					classInDataset[testLabels[i]]=0
+					classInDataset[testLabels[i]]=1
 				else:
 					classInDataset[testLabels[i]]+=1
 				if testLabels[i] not in predictionsInClass:
@@ -79,7 +82,10 @@ for folder in os.listdir("models"):
 				else:
 					predictionsInClass[testLabels[i]]+=1
 				if predictions[i]==testLabels[i]:
-					truePredictions+=1
-			print("Recall")
-			for target in extract_possible_fruit_names(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Test")):
-				print(target,":",(truePredictions/classInDataset[target]))
+						truePredictions[predictions[i]]+=1
+			print("Recall for ", file)
+			for target in classLabels:
+				print(target,":",(truePredictions[classLabels.index(target)]/classInDataset[classLabels.index(target)]))
+			print("Precision for ",file)
+			for target in classLabels:
+				print(target,":",(truePredictions[classLabels.index(target)]/predictionsInClass[classLabels.index(target)]))
