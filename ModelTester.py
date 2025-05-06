@@ -84,8 +84,16 @@ for folder in os.listdir("models"):
 				if predictions[i]==testLabels[i]:
 						truePredictions[predictions[i]]+=1
 			print("Recall for ", file)
+			sum=0
 			for target in classLabels:
-				print(target,":",(truePredictions[classLabels.index(target)]/classInDataset[classLabels.index(target)]))
+				recall = (truePredictions[classLabels.index(target)]/classInDataset[classLabels.index(target)])
+				print(target,":",recall)
+				sum+=recall
+			print(sum/len(classLabels))
 			print("Precision for ",file)
+			sum=0
 			for target in classLabels:
-				print(target,":",(truePredictions[classLabels.index(target)]/predictionsInClass[classLabels.index(target)]))
+				precision=(truePredictions[classLabels.index(target)]/predictionsInClass[classLabels.index(target)])
+				print(target,":",precision)
+				sum+=precision
+			print(sum/len(classLabels))
