@@ -10,7 +10,7 @@ import operator
 import time
 
 classLabels = []
-DEBUGGING = True
+DEBUGGING = False
 img_height = 100
 img_width = 100
 def getImagesAndLabelsFromFolderPath(folderPath, image_size=(img_height, img_width)):
@@ -36,8 +36,9 @@ def getImagesAndLabelsFromFolderPath(folderPath, image_size=(img_height, img_wid
 	return np.array(X), np.array(y)
 testImages,testLabels = getImagesAndLabelsFromFolderPath(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Test"))
 testImages = (testImages/255.0).reshape(len(testImages),img_height,img_width,3)
-for modelFile in os.listdir("models"):
-	print(os.path.join("models",modelFile))
-	model = keras.models.load_model(os.path.join("models",modelFile))
-	loss,acc = model.evaluate(testImages,testLabels)
-	print(str(modelFile)+":"+str(acc))
+for folder in os.listdir("models"):
+	for file in os.listdir(os.path.join("models",folder)):
+		if operator.contains(file,"keras"):
+			model = keras.models.load_model(os.path.join("models",folder,file))
+			loss,acc = model.evaluate(testImages,testLabels)
+			print(str(model)+":"+str(acc))
