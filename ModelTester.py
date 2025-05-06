@@ -65,3 +65,21 @@ for folder in os.listdir("models"):
 			model = keras.models.load_model(os.path.join("models",folder,file))
 			loss,acc = model.evaluate(testImages,testLabels)
 			print(str(file)+":"+str(acc))
+			predictions = model.predict(testImages)
+			truePredictions=0
+			predictionsInClass = dict()
+			classInDataset = dict()
+			for i in range(len(predictions)):
+				if testLabels[i] not in classInDataset:
+					classInDataset[testLabels[i]]=0
+				else:
+					classInDataset[testLabels[i]]+=1
+				if testLabels[i] not in predictionsInClass:
+					predictionsInClass[testLabels[i]]=1
+				else:
+					predictionsInClass[testLabels[i]]+=1
+				if predictions[i]==testLabels[i]:
+					truePredictions+=1
+			print("Recall")
+			for target in extract_possible_fruit_names(os.path.join("fruits-360-original-size-main", "fruits-360-original-size-main", "Test")):
+				print(target,":",(truePredictions/classInDataset[target]))
